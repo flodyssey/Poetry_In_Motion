@@ -1,68 +1,102 @@
+import oscP5.*;
+
 import rita.*;
-import guru.ttslib.*;
+import sound.SpeechSynthesis;
 
-TTS tts;
+String defaultVoice = "Alex";
+SpeechSynthesis speechSynthesis;
+OscP5 oscP5;
 
 
-int MAX_LINE_LENGTH = 140;
-String data = "http://rednoise.org/rita/data/";
-String chars = "q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,Q,W,E,R,T,Y,U,I,O,P,A,S,D,F,G,H,J,K,L,Z,X,C,V,B,N,M,;,.,,:,~,`,"; //chars to mess the tweet up with
-static int charsLen = 60; //length of chars string
+//int MAX_LINE_LENGTH = 140;
+//String data = "http://rednoise.org/rita/data/";
+//String chars = "q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,Q,W,E,R,T,Y,U,I,O,P,A,S,D,F,G,H,J,K,L,Z,X,C,V,B,N,M,;,.,,:,~,`,"; //chars to mess the tweet up with
+//static int charsLen = 60; //length of chars string
 
 RiText rts[];
 RiMarkov markov;
 
 String prevUnmodifiedPoem = "";
 String prevModPoem = "";
-String[] words;
+String[] words = {};
 String poem;
 
 boolean generated;
 int wordCount = 0;
 
 void setup() {
-  size(700, 150);
+  size(700, 300);
+  oscP5 = new OscP5(this, 12000); //listen for OSC messages on port 12000 (Wekinator default)
+
   markov = new RiMarkov(this, 3);  //model that tokenizes based on whitespace characters
 
-  markov.loadFrom("beowulf.txt");
+  //markov.loadFrom("beowulf.txt");
   //markov.loadFrom("keats.txt");
   //markov.loadFrom("dante.txt");
   //markov.loadFrom("milton.txt");
   //markov.loadFrom("shakespeare.txt");
-  //markov.loadFrom("dickinson.txt");
+  markov.loadFrom("dickinson.txt");
   //markov.loadFrom("seuss.txt");
-}
 
+  speechSynthesis = new SpeechSynthesis();
+}
 
 void draw() {
   background(#E3DFC7);
   fill(0, 0, 0);
   text("// Hit the button and I'll write you a poem.", 20, 45);
 
-
-  //if (generated) {
-  //  text(poem, 20, 70);
-  //}
   String sentence = "";
-  for(int i=0; i< wordCount; ++i){
+  for (int i=0; i< wordCount; ++i) {
     sentence += words[i] + " ";
   }
   text(sentence, 20, 100);
+
+  if (wordCount == words.length) {
+    String poem = markov.generateSentence();
+    words = split(poem, ' ');
+    println(words);
+    wordCount = 1;
+  }
 }
 
 void keyPressed() {
   String poem = markov.generateSentence();
   words = split(poem, ' ');
   println(words);
-  println(words.length);
-  generated = true;
-
   //poem = prevUnmodifiedPoem;
 }
 
-void mousePressed() {
-  ++wordCount;
+void oscEvent(OscMessage theOscMessage) {
+  if (theOscMessage.checkAddrPattern("/output_1")==true) {
+    println("output_1");
+    ++wordCount;
+    speechSynthesis.say("Samantha", words[wordCount - 1]);
+  } else if (theOscMessage.checkAddrPattern("/output_2")==true) {
+    println("output_2");
+    ++wordCount;
+    speechSynthesis.say("Samantha", words[wordCount - 1]);
+  } else if (theOscMessage.checkAddrPattern("/output_3") == true) {
+    println("output_3");
+    ++wordCount;
+    speechSynthesis.say("Samantha", words[wordCount - 1]);
+  } else if (theOscMessage.checkAddrPattern("/output_4") == true) {
+    println("output_4");
+    ++wordCount;
+    speechSynthesis.say("Samantha", words[wordCount - 1]);
+  } else if (theOscMessage.checkAddrPattern("/output_5") == true) {
+    println("output_5");
+    ++wordCount;
+    speechSynthesis.say("Samantha", words[wordCount - 1]);
+  } else {
+    println("Unknown OSC message received");
+  }
 }
+
+//void mousePressed() {
+//  ++wordCount;
+//  speechSynthesis.say("Samantha", words[wordCount - 1]);
+//}
 
 
 
