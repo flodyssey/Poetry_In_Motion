@@ -1,11 +1,11 @@
 import oscP5.*;
-
 import rita.*;
 import sound.SpeechSynthesis;
-
 String defaultVoice = "Alex";
 SpeechSynthesis speechSynthesis;
 OscP5 oscP5;
+
+float regressionValue; 
 
 
 //int MAX_LINE_LENGTH = 140;
@@ -15,30 +15,25 @@ OscP5 oscP5;
 
 RiText rts[];
 RiMarkov markov;
-
 String prevUnmodifiedPoem = "";
 String prevModPoem = "";
-
 String sentence = "";
 String[] sentenceWords = {};
-
 String poem = "";
-
 boolean generated;
 int wordCount = 0;
 
 void setup() {
   fullScreen();
   oscP5 = new OscP5(this, 12000); //listen for OSC messages on port 12000 (Wekinator default)
-
   markov = new RiMarkov(this, 3);  //model that tokenizes based on whitespace characters
 
   //markov.loadFrom("beowulf.txt");
   //markov.loadFrom("keats.txt");
   //markov.loadFrom("dante.txt");
   //markov.loadFrom("milton.txt");
-  //markov.loadFrom("shakespeare.txt");
-  markov.loadFrom("dickinson.txt");
+  markov.loadFrom("shakespeare.txt");
+  //markov.loadFrom("dickinson.txt");
   //markov.loadFrom("seuss.txt");
 
   speechSynthesis = new SpeechSynthesis();
@@ -46,94 +41,107 @@ void setup() {
   sentenceWords = split(sentence, ' ');
   wordCount = 0;
 }
-
 void draw() {
   background(#E3DFC7);
   fill(0, 0, 0);
   text("Dance and I'll write you a poem.", 20, 45);
-  text(sentenceWords[wordCount], 20, 100);
-  textSize(60);
+  text(poem, 20, 150, width, height); // Display full text 
+  textSize(50);
   textLeading(60);
+  //text(sentenceWords[wordCount], width/2, height/2); // Display single word
+  //textSize(200);
+  //textAlign(CENTER, CENTER);
 }
 
-void mousePressed() {    
-  if (wordCount == sentenceWords.length - 1) {
-    String newSentence = markov.generateSentence() + "\n";
-    sentenceWords = split(newSentence, ' ');
-    wordCount = 0;
+void oscEvent(OscMessage theOscMessage) {
+  if (theOscMessage.checkAddrPattern("/wek/outputs") == true) {
+    regressionValue = theOscMessage.get(0).floatValue();
   }
-  poem += sentenceWords[wordCount] + " ";
-  speechSynthesis.say("Samantha", sentenceWords[wordCount]);
-  
-  if (wordCount < sentenceWords.length - 1) {
+
+  if (regressionValue > 0.5) {
+    if (wordCount == sentenceWords.length) {
+      String newSentence = markov.generateSentence() + "\n";
+      sentenceWords = split(newSentence, ' ');
+      wordCount = 0;
+    }
+    poem += sentenceWords[wordCount] + " ";
     ++wordCount;
+    speechSynthesis.say("Samantha", sentenceWords[wordCount]);
   }
 }
 
 
-//void serialEvent(Serial arduino) {
-//  String inString = arduino.readStringUntil('\n');
-//  int arduinoMsg = 0;
-//  if (inString != null) {
-//    // trim off any whitespace:
-//    inString = trim(inString);
-//    arduinoMsg = int(inString);
-//    println(arduinoMsg);
 
-//    String poem = markov.generateSentence();
-//    prevUnmodifiedPoem = poem;
-//    String msg = randomize(poem, arduinoMsg);
-//    prevModPoem = msg;
-//    postMsg(msg);
-//    delay(12000);
+
+
+
+//void mousePressed() {  
+//  if (wordCount == sentenceWords.length) {
+//    String newSentence = markov.generateSentence() + "\n";
+//    sentenceWords = split(newSentence, ' ');
+//    wordCount = 0;
 //  }
+//  poem += sentenceWords[wordCount] + " ";
+//  ++wordCount;
+//  speechSynthesis.say("Samantha", sentenceWords[wordCount]);
 //}
 
-//String randomize(String poem, int emiVal) {
-//  String[] list = split(poem, " ");
-//  //println(list);
-//  int changes = 0; //keeps track of how many changes we've made to the poem
-//  while (changes < emiVal) { //number of changes we'll make is based on EMI
-//    int change = int(random(3)); //determines which change we'll make this pass
 
-//    if (change==0) {
-//      list = reverse(list);
-//    }
 
-//    if (change==1) {
-//      list = sort(list);
-//    }
-//    if (change==2) {
-//      list = shorten(list);
-//    }
-//    if (change==4) {
-//      list = appendRandom(list);
-//    }
 
-//    if (change==3) {
-//      list = spliceRandom(list);
+//void oscEvent(OscMessage theOscMessage) {
+//  if (theOscMessage.checkAddrPattern("/output_1")==true) {
+//    println("output_1");
+//    if (wordCount == sentenceWords.length) {
+//      String newSentence = markov.generateSentence() + "\n";
+//      sentenceWords = split(newSentence, ' ');
+//      wordCount = 0;
 //    }
-
-//    changes ++;
+//    poem += sentenceWords[wordCount] + " ";
+//    speechSynthesis.say("Daniel", sentenceWords[wordCount]);
+//    ++wordCount;
+//    speechSynthesis.say("Daniel", sentenceWords[wordCount]);
+//  } else if (theOscMessage.checkAddrPattern("/output_2")==true) {
+//    println("output_2");
+//    if (wordCount == sentenceWords.length) {
+//      String newSentence = markov.generateSentence() + "\n";
+//      sentenceWords = split(newSentence, ' ');
+//      wordCount = 0;
+//    }
+//    poem += sentenceWords[wordCount] + " ";
+//    speechSynthesis.say("Daniel", sentenceWords[wordCount]);
+//    ++wordCount;
+//  } else if (theOscMessage.checkAddrPattern("/output_3") == true) {
+//    println("output_3");
+//    if (wordCount == sentenceWords.length) {
+//      String newSentence = markov.generateSentence() + "\n";
+//      sentenceWords = split(newSentence, ' ');
+//      wordCount = 0;
+//    }
+//    poem += sentenceWords[wordCount] + " ";
+//    speechSynthesis.say("Daniel", sentenceWords[wordCount]);
+//    ++wordCount;
+//  } else if (theOscMessage.checkAddrPattern("/output_4") == true) {
+//    println("output_4");
+//    if (wordCount == sentenceWords.length) {
+//      String newSentence = markov.generateSentence() + "\n";
+//      sentenceWords = split(newSentence, ' ');
+//      wordCount = 0;
+//    }
+//    poem += sentenceWords[wordCount] + " ";
+//    speechSynthesis.say("Daniel", sentenceWords[wordCount]);
+//    ++wordCount;
+//  } else if (theOscMessage.checkAddrPattern("/output_5") == true) {
+//    println("output_5");
+//    if (wordCount == sentenceWords.length) {
+//      String newSentence = markov.generateSentence() + "\n";
+//      sentenceWords = split(newSentence, ' ');
+//      wordCount = 0;
+//    }
+//    poem += sentenceWords[wordCount] + " ";
+//    speechSynthesis.say("Daniel", sentenceWords[wordCount]);
+//    ++wordCount;
+//  } else {
+//    println("Unknown OSC message received");
 //  }
-//  poem = join(list, " ");
-//  return poem;
-//}
-
-//String[] appendRandom(String[] list) {
-//  int randomLen = int(random(1, 7)); //random length of string to append
-//  int randomInd = int(random(1, 60)); //random index
-//  // String[] charsList = chars.split(",");
-//  String toAppend = chars.substring(randomInd, randomInd+randomLen);
-//  String[] list2 = append(list, toAppend);
-//  return list2;
-//}
-
-//String[] spliceRandom(String[] list) {
-//  int randomLen = int(random(1, 7)); //random length of string to splice
-//  int randomInd = int(random(1, 60)); //random index
-//  int index = int(random(0, 5)); //6 words is minimum length of sentence; this index is where we'll splice in
-//  String toSplice = chars.substring(randomInd, randomInd+randomLen);
-//  String[] list2 = splice(list, toSplice, index);
-//  return list2;
 //}
