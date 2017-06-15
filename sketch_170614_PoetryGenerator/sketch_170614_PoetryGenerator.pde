@@ -72,9 +72,6 @@ void oscEvent(OscMessage theOscMessage) {
 
 
 
-
-
-
 //void mousePressed() {  
 //  if (wordCount == sentenceWords.length) {
 //    String newSentence = markov.generateSentence() + "\n";
