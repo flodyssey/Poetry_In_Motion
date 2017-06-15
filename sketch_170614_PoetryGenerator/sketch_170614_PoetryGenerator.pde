@@ -1,5 +1,8 @@
-
 import rita.*;
+import guru.ttslib.*;
+
+TTS tts;
+
 
 int MAX_LINE_LENGTH = 140;
 String data = "http://rednoise.org/rita/data/";
@@ -11,18 +14,23 @@ RiMarkov markov;
 
 String prevUnmodifiedPoem = "";
 String prevModPoem = "";
+String[] words;
+String poem;
+
+boolean generated;
+int wordCount = 0;
 
 void setup() {
   size(700, 150);
   markov = new RiMarkov(this, 3);  //model that tokenizes based on whitespace characters
 
-  //markov.loadFrom("beowulf.txt");
+  markov.loadFrom("beowulf.txt");
   //markov.loadFrom("keats.txt");
   //markov.loadFrom("dante.txt");
   //markov.loadFrom("milton.txt");
   //markov.loadFrom("shakespeare.txt");
-   markov.loadFrom("dickinson.txt");
-
+  //markov.loadFrom("dickinson.txt");
+  //markov.loadFrom("seuss.txt");
 }
 
 
@@ -30,15 +38,35 @@ void draw() {
   background(#E3DFC7);
   fill(0, 0, 0);
   text("// Hit the button and I'll write you a poem.", 20, 45);
-  text(prevUnmodifiedPoem, 20, 70);
-  text(prevModPoem, 20, 95);
+
+
+  //if (generated) {
+  //  text(poem, 20, 70);
+  //}
+  String sentence = "";
+  for(int i=0; i< wordCount; ++i){
+    sentence += words[i] + " ";
+  }
+  text(sentence, 20, 100);
 }
 
 void keyPressed() {
   String poem = markov.generateSentence();
-  println(poem) ;
+  words = split(poem, ' ');
+  println(words);
+  println(words.length);
+  generated = true;
 
+  //poem = prevUnmodifiedPoem;
 }
+
+void mousePressed() {
+  ++wordCount;
+}
+
+
+
+
 
 //void serialEvent(Serial arduino) {
 //  String inString = arduino.readStringUntil('\n');
@@ -58,51 +86,51 @@ void keyPressed() {
 //  }
 //}
 
-String randomize(String poem, int emiVal) {
-  String[] list = split(poem, " ");
-  //println(list);
-  int changes = 0; //keeps track of how many changes we've made to the poem
-  while (changes < emiVal) { //number of changes we'll make is based on EMI
-    int change = int(random(3)); //determines which change we'll make this pass
+//String randomize(String poem, int emiVal) {
+//  String[] list = split(poem, " ");
+//  //println(list);
+//  int changes = 0; //keeps track of how many changes we've made to the poem
+//  while (changes < emiVal) { //number of changes we'll make is based on EMI
+//    int change = int(random(3)); //determines which change we'll make this pass
 
-    if (change==0) {
-      list = reverse(list);
-    }
+//    if (change==0) {
+//      list = reverse(list);
+//    }
 
-    if (change==1) {
-      list = sort(list);
-    }
-    if (change==2) {
-      list = shorten(list);
-    }
-    if (change==4) {
-      list = appendRandom(list);
-    }
+//    if (change==1) {
+//      list = sort(list);
+//    }
+//    if (change==2) {
+//      list = shorten(list);
+//    }
+//    if (change==4) {
+//      list = appendRandom(list);
+//    }
 
-    if (change==3) {
-      list = spliceRandom(list);
-    }
+//    if (change==3) {
+//      list = spliceRandom(list);
+//    }
 
-    changes ++;
-  }
-  poem = join(list, " ");
-  return poem;
-}
+//    changes ++;
+//  }
+//  poem = join(list, " ");
+//  return poem;
+//}
 
-String[] appendRandom(String[] list) {
-  int randomLen = int(random(1, 7)); //random length of string to append
-  int randomInd = int(random(1, 60)); //random index
-  // String[] charsList = chars.split(",");
-  String toAppend = chars.substring(randomInd, randomInd+randomLen);
-  String[] list2 = append(list, toAppend);
-  return list2;
-}
+//String[] appendRandom(String[] list) {
+//  int randomLen = int(random(1, 7)); //random length of string to append
+//  int randomInd = int(random(1, 60)); //random index
+//  // String[] charsList = chars.split(",");
+//  String toAppend = chars.substring(randomInd, randomInd+randomLen);
+//  String[] list2 = append(list, toAppend);
+//  return list2;
+//}
 
-String[] spliceRandom(String[] list) {
-  int randomLen = int(random(1, 7)); //random length of string to splice
-  int randomInd = int(random(1, 60)); //random index
-  int index = int(random(0, 5)); //6 words is minimum length of sentence; this index is where we'll splice in
-  String toSplice = chars.substring(randomInd, randomInd+randomLen);
-  String[] list2 = splice(list, toSplice, index);
-  return list2;
-}
+//String[] spliceRandom(String[] list) {
+//  int randomLen = int(random(1, 7)); //random length of string to splice
+//  int randomInd = int(random(1, 60)); //random index
+//  int index = int(random(0, 5)); //6 words is minimum length of sentence; this index is where we'll splice in
+//  String toSplice = chars.substring(randomInd, randomInd+randomLen);
+//  String[] list2 = splice(list, toSplice, index);
+//  return list2;
+//}
